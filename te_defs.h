@@ -197,7 +197,7 @@ struct qh           /* q-register header */
     {
     struct buffcell *f; /* forward pointer */
     struct buffcell *b; /* backward pointer */
-    int z;              /* number of characters */
+    size_t z;              /* number of characters */
     int v;              /* q-register numeric value */
     } ;
 
@@ -205,9 +205,9 @@ struct qp           /* q-register pointer/macro stack entry */
     {
     struct qp *f;       /* forward pointer */
     struct buffcell *p; /* pointer to a buffer cell */
-    int c;              /* character offset */
-    int z;              /* number of characters in object pointed to */
-    int dot;            /* current character position */
+    size_t c;              /* character offset */
+    size_t z;              /* number of characters in object pointed to */
+    size_t dot;            /* current character position */
     int flag;           /* flags for "iteration in process," "ei macro," etc. */
     struct is *il;      /* iteration list pointer */
     int *condsp;        /* saved conditional stack pointer */
@@ -218,8 +218,8 @@ struct is           /* macro iteration list entry */
     struct is *f;       /* forward pointer */
     struct is *b;       /* backward pointer */
     struct buffcell *p; /* cell with start of iteration */
-    int c;              /* char offset where iteration started */
-    int dot;            /* char position where iteration started */
+    size_t c;              /* char offset where iteration started */
+    size_t dot;            /* char position where iteration started */
     int count;          /* iteration count */
     int dflag;          /* definite iteration flag */
     } ;
@@ -229,7 +229,7 @@ struct ms           /* macro stack entry */ /* not used at present */
     struct ms *f;       /* forward pointer */
     struct ms *b;       /* backward pointer */
     struct buffcell *p; /* pointer to a buffer cell */
-    int c;              /* character offset */
+    size_t c;              /* character offset */
     struct is *il;      /* pointer to iteration list */
     } ;
 
@@ -237,8 +237,8 @@ struct bh           /* buffer header list entry */
     {
     struct buffcell *f; /* pointer to buffer */
     struct buffcell *b; /* null pointer */
-    int z;              /* number of characters */
-    int dot;            /* current pointer position */
+    size_t z;              /* number of characters */
+    size_t dot;            /* current pointer position */
     int buff_mod;       /* buffer - modified position for display */
     } ;
 
@@ -265,7 +265,7 @@ struct outfiledata              /* structure of output file info */
     FILE *fd;                       /* file pointer */
     char f_name[CELLSIZE+5];        /* real name of output */
     char t_name[CELLSIZE+5];        /* temporary output name */
-    int name_size;                  /* number of chars in name */
+    size_t name_size;                  /* number of chars in name */
     int bak;                        /* backup flag */
     } ;
 

@@ -1040,10 +1040,10 @@ w_ebol()
 /* returns nonzero if a text buffer exists, otherwise 0 */
 
 int w_setptr(loc, pp)
-    register int loc;               /* location */
+    register size_t loc;               /* location */
     register struct qp *pp;         /* address of pointer */
     {
-    register int i;
+    register size_t i;
 
     if (pb0->f)
 	{
@@ -1051,7 +1051,7 @@ int w_setptr(loc, pp)
 	pp->c = loc % CELLSIZE;
 	pp->dot = loc;
 	}
-    return( (int) pb0->f);
+    return( (size_t) pb0->f);
     }
 
 /* routine to move N lines (back, forward, or 0)                */
