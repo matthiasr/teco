@@ -64,7 +64,7 @@ short redraw_sw;                /* forces absolute redraw */
 
 
 /* fill characters and terminal speeds: 0th entry used when std out is not a terminal */
-char win_speeds[] = { 0, 0, B9600, B4800, B2400, B1800, B1200, B600, B300, B200, B150, B134, B110 };
+int win_speeds[] = { 0, 0, B9600, B4800, B2400, B1800, B1200, B600, B300, B200, B150, B134, B110 };
 char win_dlye[] =   { 0, 90, 45, 23, 11, 9, 6, 3, 1, 1, 1, 1, 1 };  /* delay for erase-screen */
 char win_dlys[] =   { 0, 60, 30, 15, 7, 6, 4, 2, 1, 1, 0, 0, 0 };   /* delay for scroll ops */
 char win_dlyl[] =   { 0, 4, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };      /* delay for erase line */
