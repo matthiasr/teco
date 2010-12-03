@@ -1,0 +1,10 @@
+! typical startup file for TECO !
+! does EBfile$ and 5,7:w !
+! call this file .tecorc in home directory !
+@ei// hk :qz-3"g gz j:s "s
+0k hxz hk 
+:ebqz "e
+File not found:  :g* 
+ hkekex '
+y'' 5,7:w 0,0xz 
+

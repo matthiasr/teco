@@ -1,0 +1,92 @@
+A few quick comments on the ways teco arranges its internal
+data storage
+
+  Teco has two classes of buffer:
+	1. Text buffer (the text buffer, q-registers, the command string)
+	2. Other (buffer header, buffer pointer, iteration-stack entry)
+
+
+Text buffers
+
+  Each text buffer is a linked list of cells; this is a convenient
+way to divide a single address space among an arbitrary number of
+buffers of arbitrary size.  Each cell ("struct buffcell") contains a
+forward pointer, a backward pointer, and an array of characters.
+The teco buffer, each q-register, each entry on the q-register
+pushdown list, and the command string are lists of these cells.
+
+  Teco maintains a list of free buffer cells, and its storage
+allocation routines furnish cells when needed and accept returned
+ones.  If the list of free cells is empty, teco calls malloc() to
+get a block of storage which it then divides into cells.  Teco never
+returns the storage it gets from malloc().
+
+  The text buffer is kept in packed form: each cell but the last
+contains the full number of characters.  This makes it easy for teco
+to find its way through the buffer but increases the time taken by
+insert and delete.  It might be interesting to add a "count" field
+to the buffer cell and allow cells within the buffer to have empty
+spaces at the end; this is a possible future modification.
+
+
+Other
+
+  Teco uses three types of small data cell - the q-register header
+("struct qh"), the q-register pointer ("struct qp"), and the macro
+iteration list entry ("struct is").  Although defined as separate
+structures, these are really the same basic cell: they are kept as
+a list of free cells and cast to the proper definition when needed.
+
+  As in the case of text-buffer cells, data cells are supplied by and
+returned to teco's storage allocation routines.  When a data cell is
+needed and no free cells are available, the storage allocator obtains
+a text buffer cell and carves it up into smaller cells, thus, the text-
+buffer cell system is the only interface to malloc().
+
+  A text-buffer header ("struct qh") consists of a forward pointer that
+points to the first cell of the buffer, a backward pointer that is NULL,
+a count of characters, and an integer value - the "value" of a numeric
+q-register.  The teco buffer has a named header named buff; the q-registers
+have an array, named qreg[], of headers.  
+
+	NOTE that the "struct qh" and the "struct buffcell" begin
+	identically: the forward and backward pointers are in
+	the same locations in both structures.  Teco uses this in
+	handling lists: because the buffer header appears to be a
+	buffer cell, inserting a cell at the beginning of a list is
+	the same as inserting one farther down.  This is probably a
+	bad implementation and may not work on all machines.
+
+  A q-register pointer ("struct qp") points to a place within a text
+buffer or q-register or the command string.  It has a pointer to the
+current buffer cell, a value of the current character within the cell,
+values for the number of characters in the buffer and the number of the
+current character, and, if it is a macro-stack entry, a pointer to the
+iteration stack for that macro.
+
+  A number of q-register pointers are used as general temporaries, for
+moving text within the buffer, outputting text, etc.  A stack of these
+pointers, the macro stack mstack[], controls the execution of command
+strings and macros.  The stack's first entry always points to the command
+string, and a new entry is pushed each time a macro is invoked and is
+popped when the macro terminates.
+
+  An iteration-stack entry ("struct is") maintains the data needed for
+command-string or macro iteration.  Each command or macro level can
+have an iteration stack associated with it: this is kept as a linked
+list of iteration-stack entries, and the macro stack entry contains a
+pointer to the head of the list.  Each iteration-stack entry contains
+forward and backward pointers for the iteration stack, a pointer
+(cell address, character offset, absolute character count) to the
+command that starts the iteration, a count of iterations remaining,
+and a flag for definite/indefinite iteration.
+
+  An iteration stack is created for a particular command or macro level
+the first time that a loop is encountered at that level.  The cells of
+the stack are not reclaimed but are reused the next time an iteration
+occurs at that command level.
+
+
+  The data definitions specify two more data-structure types, a macro
+stack entry ("struct ms") and a buffer header list entry ("struct bh").
+These are not used at present.

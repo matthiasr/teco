@@ -1,0 +1,54 @@
+! teco startup file 03/07/88 13.55 !
+! invoke te -vf8erw [+nnn] [@file] [file] [file2] !
+! -v screen off (default on) !
+! -f formfeed ends page (default no) !
+! -8 tabs every 8 chars (default 4) !
+! -e erfile$ ewfile2$ if file2, else erfile$ ewfile$ !
+! -r erfile$ only !
+! -w ewfile$ only !
+! +nnn use unix line convention, start at line nnn !
+! @file do eifile$, leave rest of line in qz for macro !
+
+@ei// hk 70+128ez gz 0j 0ux 0uz 0,0xx 0,0xy
+<:s "u zj 0;' ::s-;    ! scan option flags !
+ <.-z"e 0;'
+  0a-^^f"e 2,0ez
+  | 0a-^^8"e 4,0ez
+  | 0a-^^e"e qz&56+1uz
+  | 0a-^^r"e qz&56+2uz
+  | 0a-^^w"e qz&56+4uz
+  | 0a-^^v"e qz#8uz
+  | 0a-^^ "e 0;
+  | @^A/Invalid option / 0a^T 13^T 10^T hkekex ''''''' 1c>>
+
+::s+"s 0,32ez \ux ::s  qx"g -1%x''    ! if +nnn option spec'd save line count !
+
+<.-z;        ! scan file args !
+ ::s  ::s@"s
+  .uy :s "s 1r | zj' qy,.xw ::s  .,zxzhk 0;  ! indir file !
+ | .uy :s "s 1r | zj'
+  :qx"e qy,.xx 0,.k     ! one file arg !
+  | :qy"e qy,.xy 0,.k   ! two file args !
+  | @^A/Too many files specified/ 13^T 10^T hkekex'''   ! more than 2 !
+>
+
+hk
+qz&8"e :qw"e 5,7:w''
+
+:qx"e qz&7"n @^A/(No file specified)/ 13^T 10^T '
+| qz&6"n      ! -r or -w only one file allowed !
+  :qy"n @^A/Too many files specified/ 13^T 10^T hkekex
+  | qz&2"n :erqx"u @^A/File not found: / :g* 13^T 10^T hkekex' y | ewqx ''   ! -r or -w !
+| :qy"n :erqx"u @^A/File not found: / :g* 13^T 10^T hkekex' ewqy y      ! 2 files: ERfirst, EWsecond !
+  | qz&1"n :erqx "u @^A/File not found: / :g* 13^T 10^T hkekex'ewqx y   ! 1 file: ER,EW if -e !
+    | :ebqx "u @^A/File not found: / :g* 13^T 10^T hkekex' y ' ' ' '       ! EB otherwise !
+
+0j qxl 0ux 0,0xx 0,0xy
+
+! if @file spec'd do it !
+:qw"n :@ei/qw/"u :@ei/qw.tec/"u
+ @^A/file not found: / :gx 13^T 10^T hkekex'' 0,0xw ^C '
+
+0,0xz
+0uz
+

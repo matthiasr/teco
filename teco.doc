@@ -1,0 +1,233 @@
+TECO for Ultrix			Matt Fichtenbaum	February 27, 1987
+							revised 7/17/89
+
+     This TECO is almost compatible with "Standard TECO" as described in
+DEC literature.  It differs in its display support and interaction with the
+operating system, and in the omission of a few less-frequently-used features.
+A few of its features are extensions not found in Standard TECO.
+
+     The following is a brief comparison between this TECO and Standard
+TECO version 36, the last for which I have notes.
+
+
+Missing features:
+
+   ^F (console switch register)
+   EG (exit and execute system command)
+   EH (help flag)
+   ET & 16 (cancel ^O on output)
+   ET & 64 (detach)
+   EU (upper/lower case flag)
+   backward paging in file (negative arguments to P, N, etc.)
+
+
+New features:
+
+   EQtext$	pass "text" as a command to the shell.  The command is executed
+   or		in a Unix subshell, with standard input, output, and error
+   @EQ/text/	connected to the terminal (i.e., unchanged from TECO's setup).
+
+   nEQtext$	pass "text" as a command to the shell.  The command is executed
+   or		in a Unix subshell.  The command's standard input is the
+   m,nEQtext$	specified text ("n" lines or "m,n" characters) from TECO's
+   (and "@"	buffer, and its standard output replaces the text in q-register
+   forms)	q#.  This form of the EQ command thus passes text from TECO's
+		buffer through a Unix command and makes the result available to
+		TECO.  (The pointer is left after the specified text and ^S is
+		set appropriately, so ^SDG# after m,nEQcommand$ replaces the
+		original text with the command's output)
+
+   EQ commands	execute same command as previous EQ.  The presence of arguments
+   with empty	specifies the command's standard input and output, as above.
+   string (EQ$)
+
+   ^P		if the pointer is positioned on one of the characters
+		( )  { }  [ ]  < >  " ' then ^P has the value of the number
+		of characters to the matching character.  Otherwise ^P has
+		value 0.  Thus ^PC performs the same function as "%" in vi.
+		(Note: " is considered to match ' )
+
+   Q%		buffer containing last Unix command string from EQ command
+
+   Q#		buffer containing ASCII text from Unix.  After the commands
+		"nEQ" and "m,nEQ" this is the standard output from the
+		invoked command; after ^B or ^H this is the date and time
+		expressed as a character string.
+
+	Text buffer of arbitrary size, using Ultrix virtual memory.
+
+	Dual text buffers, optionally associated with primary and secondary
+I/O streams.  Split-screen window display of the two buffers.
+
+   EZ		word with some unrelated one-bit flags, as follows:
+
+	1	0: read Unix files: '\n' in file becomes <CR><LF> in
+		   TECO buffer, converted back to '\n' on write.
+		1: read files literally without this conversion.
+
+	2	0: read from file terminates on form feed or EOF
+		1: read terminates on EOF only; FFs are put into the buffer
+
+	4	0: tabs are displayed every 8 columns
+		1: tabs are displayed every 4 columns
+
+	8	0: EWfile$ and EBfile$ open "file.tmp" as output file;
+		   this is renamed to "file" when output file is closed.
+		1: EWfile$ opens "file" as named - any preexisting file
+		   of this name is immediately deleted.  EBfile$ always
+		   opens "file.tmp."
+		   (This form must be used when the output is to a non-
+		   directory device, e.g. /dev/tty)
+
+	16	0: <TAB>text$ inserts a tab, then text
+		1: <TAB> is ignored as a command
+
+	32	0: <LF>, <FF> and <VT> count as line separators for commands
+		   that count lines (nL, nXq, etc.)
+		1: only <LF> counts as a line separator
+
+	64	0: ER or EB commands that specify multiple files cause an error
+		1: These commands open the first specified files; other files may
+		   be accessed with the EN$ command (see File Expansion, below)
+
+	128	0: Switching between primary and secondary I/O streams is
+		   independent of switching between dual text buffers
+		   (see EE command, below)
+		1: Primary, secondary I/O streams are associated with text
+		   buffers 0 and 1 respectively; explicitly switching I/O
+		   streams is not allowed.
+
+Things that work differently
+
+   startup	this TECO looks for a file called ".tecorc" in the current
+		directory and then in the user's home directory.  TECO
+		does no processing of command line arguments, but the
+		entire command line is passed to .tecorc in Q-register Z.
+		.tecorc may treat the command line as it wishes.
+
+   EB		EBfile$ opens "file.tmp" for output.  When the file is
+		successfully closed (EC, EF, EX), the original file is
+		renamed with a ".bak" suffix and the ".tmp" file is
+		renamed with the original name (see bit "8" of variable EZ).
+
+   ED & 4	When this bit is set, a command that reads the input file
+		(P, Y, A) stops reading when the number of characters in
+		the buffer exceeds 16384.  When this bit is clear, the
+		buffer is expanded without limit.
+
+   EN		ENtext$ or @EN/text/ specifies a file specification that is
+		passed to the shell for expansion into one or more file names.
+		EN$ or @EN//, with no string specified, fetches the next file
+		name into the filespec buffer.  If there are no more files
+		:EN returns 0, EN causes an error.
+
+   Filename	When specified in ER or EB commands, filenames that begin with
+   expansion	the character ~, or that contain any of the characters * ? { [,
+		are passed to the shell to be expanded.  If exactly one file
+		matches the specification this file is opened.  If more than one
+		file matches, the action depends on the setting of bit 64 in
+		variable EZ: if this bit is 0, TECO reponds with an "ambiguous
+		file specification" error; if this bit is 1, TECO substitutes
+		the list of files for the list resulting from the last EN command,
+		if any, and opens the first file on the list.  Subsequent entries
+		on this list are fetched to the filespec buffer by the EN$
+		command, as above.
+
+		When specified in EI commands, filenames that must be expanded by
+		the shell as above must match exactly one file.
+
+		When specified in EW commands, filenames expanded by the shell may
+		not match multiple files.  If a wildcard specification matches an
+		existing file, TECO asks for confirmation that the user wants to
+		overwrite that file.
+
+   window	this TECO's window support is hard-coded for a VT100-type
+		terminal.  It includes many but not all of the window
+		functions of Standard TECO.  The following is a summary of
+		the display features:
+
+	0:w	(terminal type)		always 4 (VT100 in ANSI mode)
+	1:w	(terminal width)	obtained from Ultrix at startup
+	2:w	(terminal height)	obtained from Ultrix at startup
+	3:w	(seeall mode)		implemented for tabs only
+	4:w	(mark)			unimplemented
+	5:w	(hold mode)		unimplemented
+	6:w	(screen origin)		read-only parameter
+	7:w	(scroll mode)		implemented
+
+	8:w	(second window size)	see "dual text buffers," below
+	9:w	(second window origin)	see "dual text buffers," below
+	10:w	(first window size)	see "dual text buffers," below
+
+	^W	immediate absolute window redraw
+
+	nW	(n not 0 or -1000) immediate window redraw, incremental
+		  unless other output commands have been executed and scroll
+		  mode was disabled
+
+	-1000W	"forget" that output has occurred
+
+	Note:	window functions using other "special" values as arguments
+		  to nW are not implemented.
+
+   EV, ES	argument to these is the number of lines to display
+		(nEV displays 2N-1 lines about the line containing
+		the pointer).  The character at the pointer is
+		shown in reverse video.
+
+Dual text buffers
+
+     This TECO has two independent text buffers, each with its own "dot"
+(current buffer position) and "z" (number of characters in buffer) variables.
+The TECO command nEE, where "n" has the value 0 or 1, selects the current
+buffer; EE with no argument returns the number of the currently selected buffer.
+All TECO commands that affect the text buffer operate on the buffer currently
+selected.
+
+     If the "128" bit is set in variable EZ, then selecting text buffer 0
+automatically selects TECO's primary input and output streams, selecting
+text buffer 1 automatically selects the secondary streams, and the commands
+that explicitly switch between primary and secondary streams (EA, EP, ER$,
+EW$) are inhibited.  The EX command will flush and close the buffer and
+file currently selected; if the other buffer is not empty and/or the other
+output file is open, TECO displays an appropriate error.
+
+     The scroll mode display window can be split into two windows each
+displaying one of the two text buffers.  The command n,8:w defines the size
+of the window associated with text buffer 1.  The read-only value 9:w is equal
+to the buffer position of the first character in this window; the value 10:w
+is equal to the size of the window associated with text buffer 0.  On VT-100s
+with advanced video, the cursor in the currently selected window is displayed
+with intensified video.
+
+Interactions with Ultrix
+
+     Terminal I/O uses stdin and stdout; numerous ioctl's are used to
+adjust the terminal driver's modes.  File I/O uses the buffered I/O
+functions of <stdio.h>.
+
+     The time (^H) and date (^B) make use of the system call
+"gettimeofday" (2).
+
+     The EQ and EN commands and the expansion of filenames for the ER
+and EB commands spawn child processes that use pipes for interprocess
+communication.
+
+     Teco explicitly handles the following signals:
+
+	SIGINT (interrupt)	The "interrupt" character (^C or equivalent)
+		interrupts an executing Teco command string or macro, and
+		gives the error "Execution interrupted."  When no command
+		string is executing this character is not treated specially.
+
+	SIGTSTP (suspend)	Teco responds to this signal by restoring
+		the terminal characteristics to their original values and
+		then suspending itself.
+
+	SIGHUP (hangup)		Teco responds to this signal by attempting
+		to save the text buffer and any open output files before
+		exiting.  If there is any text in the buffer, it is written
+		to the currently- selected output file; if there is no file,
+		the buffer is written to the file TECO_SAVED.tmp.  Any open
+		output files are closed, retaining their ".tmp" suffixes.
+		Unread input is not copied to the output files.

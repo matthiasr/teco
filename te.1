@@ -1,0 +1,48 @@
+.TH TE 1 "Nov 12, 1993"
+.SH NAME
+te -- the TECO text editor
+.SH SYNOPSIS
+te [filename]
+.SH DESCRIPTION
+.PP
+te(1) is an implementation of TECO in portable C.  It implements DEC standard TECO, with some exceptions and extensions described
+below.
+
+te assumes a VT100-type terminal, and its display
+driver is hard-coded for such.
+.SH DOCUMENTATION
+The DEC Standard TECO book describes the basic editing
+functions of TECO.  teco.doc describes the differences
+between te and standard TECO, including the extensions
+for the Ultrix environment.
+.SH FILES
+.TP 10
+~/.tecorc
+editor startup file
+.TP 10
+<file>.tmp
+temporary output file(s)
+.TP 10
+<file>.bak
+previous version of edited file
+.TP 10
+/etc/termcap
+describes terminal (used only to find width of VT100)
+.SH AUTHOR
+Matt Fichtenbaum, GenRad Inc., Concord, Mass.  Portability hacks by
+Eric S. Raymond <esr@snark.thyrsus.com>.
+.SH BUGS
+te's file name processing doesn't handle ~ and other
+shell meta-characters.  The wildcard function EN does
+handle these.
+.PP
+te acquires memory for its buffer using malloc(), but
+never returns the space.  This can cause the task in
+memory to appear to be larger than it is.
+.PP
+Several of the standard display features of TECO, most
+notably the -256+n:W command used by interpretive editing
+macros, are unimplemented.  There are undoubtedly some
+subtle bugs in the display handler for the features that
+are implemented.
+

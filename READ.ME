@@ -1,0 +1,85 @@
+			TECO for UNIX
+		(original by Matt Fichtenbaum;
+	adaptation for PTF release by Eric Raymond)
+
+The code in this directory started out life as Matt Fichtenbaum's Ultrix 
+Teco implementation from 1986.  I've supplied an improved Makefile and a
+real man page, rescued the two sample profiles from invisibility, and brought
+the code up to strict ANSI/POSIX compliance.
+
+If _POSIX_SOURCE is off, the original BSD tty handling will be compiled in.
+This probably still works.  One feature it supports that the POSIXified
+code loses is that receipt of an interrupt signal causes a ^C to be put in
+the input stream.  The POSIX code treats SIGINT as a pure interrupt, which
+terminates execution unless the internal trap flag is set, in which case
+the signal is simply ignored (and no ^C appears in the input stream).
+
+Unfortunately, I have not yet been able to find softcopy of the DEC TECO
+reference.  So you're on your own as far as learning it goes.
+
+Here is a summary of the available doc files:
+
+READ.ME		--- this file
+te.1		--- an unformatted UNIX man page
+teco.doc	--- describes differences between this and Standard Teco
+teco_data.doc	--- some description of te's internals
+
+Here is a slightly edited version of the original maketeco.doc file:
+
+TECO for Ultrix			Matt Fichtenbaum  3/27/86  revised 7/25/86
+
+     These notes describe briefly what it is and how to make it.
+
+     Ultrix TECO is an editor that is mostly compatible with DEC
+Standard TECO.  It is written in C to run under Ultrix (and other
+Unix (tm) implementations, e.g., it has compiled and run on a Sun
+workstation).  It implements all the editor functions of DEC TECO
+and it has some additional features suited to the Unix environment,
+such as the ability to execute Unix commands or to pass text from
+TECO's buffer through a Unix process and incorporate the result
+into the text buffer.  It lacks some of the display support features
+of Standard TECO, but includes the split-screen "window" mode
+suitable for using "raw" TECO.
+
+     Note that TECO's CRT routines are hard-coded for a VT100-type
+terminal.  Using another type of terminal requires changing these
+routines.
+
+     Ultrix TECO consists of twelve source files:
+
+	te_defs.h	definitions file #include'd by the .c files
+	te_data.c	"common" data
+	te_main.c	main program
+	te_rdcmd.c	read commands and build the command string
+	te_exec0.c	exec commands 1 (initial dispatch & expressions)
+	te_exec1.c	exec commands 2 (most commands)
+	te_exec2.c	exec commands 3 (E, F commands, file I/O, Unix extensions)
+	te_srch.c	search operations
+	te_window.c	CRT display routines
+	te_chario.c	terminal I/O, interaction with tty driver, signals
+	te_subs.c	higher level subroutines
+	te_utils.c	lower level subroutines
+
+To make te, just type `make'.  If you lack either gcc or POSIX-compatible
+headers and libraries, you may have to tweak the makefile slightly.
+
+Note that TECO catches the "interrupt" (^C) signal; this may cause problems
+when using dbx or gdb.  This can be circumvented by compiling te_chario.c with
+the symbol DEBUG defined, i.e.,
+
+	cc -c -g -DDEBUG te_chario.c
+
+(naturally, the -g flag should be specified to all the cc commands if dbx or
+gdb is to be used).
+
+     The file sample.tecorc illustrates one possible startup.  It implements
+'te file' to mean
+
+	%te
+	*ebfile$y5,7:w$$
+
+To use this file, copy to ${HOME}/.tecorc from sample.tecorc.  We supply a
+second initialization file, sample.tecorc2, that supports a somewhat more
+elaborate environment.
+
+
