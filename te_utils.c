@@ -13,7 +13,7 @@
 
 struct buffcell *get_bcell()
     {
-    char *malloc();
+    void *malloc(size_t);
     struct buffcell *p;
     int i;
 

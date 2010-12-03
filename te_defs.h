@@ -323,6 +323,8 @@ extern char skipto(), find_endcond(), getcmdc(), getcmdc0();    /* routines that
 
 extern FILE *eisw;                      /* indirect command file pointer    */
 extern FILE *fopen();
+
+extern void exit(int);
 
 extern struct buffcell *freebuff;       /* buffcell free-list pointer   */
 extern struct buffcell *dly_freebuff;   /* delayed free-list pointer    */
