@@ -114,7 +114,7 @@ do_e()
 
 	case 'b':               /* open read/write with backup */
 	    if (!read_filename(1, 'r')) ERROR(E_NFI);   /* read the name */
-	    if (infile->fd) fclose(infile->fd);         /* close previously-open file */
+	    if (infile->fd) fclose(infile->fd), infile->fd = NULL;         /* close previously-open file */
 	    if (!(infile->fd = fopen(fbuf.f->ch, "r")))
 		{
 		if (!colonflag) ERROR(E_FNF);
@@ -158,7 +158,7 @@ do_e()
 	case 'f':               /* close output file */
 	    if (outfile->fd)    /* only if one is open */
 		{
-		fclose(outfile->fd);
+		fclose(outfile->fd), outfile->fd = NULL;
 		if (outfile->bak & 1)       /* if this is "backup" mode */
 		    {
 		    outfile->f_name[outfile->name_size] = '.';
@@ -197,7 +197,7 @@ do_e()
 		{
 		if (eisw)       /* if ending a file execute, restore the previous "old command string" */
 		    {
-		    fclose(eisw);               /* return the file descriptor */
+		    fclose(eisw), eisw = NULL;               /* return the file descriptor */
 		    dly_free_blist(cbuf.f);     /* return the command string used by the file (after execution done) */
 		    cbuf.f = oldcstring.f;
 		    cbuf.z = oldcstring.z;
@@ -214,7 +214,7 @@ do_e()
 		oldcstring.z = cbuf.z;
 		cbuf.f = NULL;              /* and make it inaccessible to "rdcmd" */
 		}
-	    if (eisw) fclose(eisw);         /* if a command file had been open, close it */
+	    if (eisw) fclose(eisw), eisw = NULL;         /* if a command file had been open, close it */
 	    esp->val1 = (eisw = t_eisw) ? -1 : 0;
 	    esp->flag1 = colonflag;
 	    colonflag = 0;
@@ -238,7 +238,7 @@ do_e()
 		}
 	    else
 		{
-		if (infile->fd) fclose(infile->fd);             /* close previously-open file */
+		if (infile->fd) fclose(infile->fd), infile->fd = NULL;             /* close previously-open file */
 		if (!(infile->fd = fopen(fbuf.f->ch, "r")))
 		    {
 		    if (!colonflag) ERROR(E_FNF);
@@ -408,7 +408,7 @@ int do_eq1(shell)
 	    ERROR(E_SYS);           /* "open" failure */
 	    }
 	read_stream(xx_out, 0, &bb, &timbuf.z, 0, 0, 1);        /* read from pipe to q# */
-	fclose(xx_out);
+	fclose(xx_out), xx_out = NULL;
 
 	while (wait(&status) != -1)        /* wait for children to finish */
 	    continue;
@@ -449,7 +449,7 @@ int do_eq1(shell)
 		close(fileno(stdout));
 		if ((xx_in = fdopen(pipe_in[1], "w")) == 0) exit(1);    /* open pipe for writing; exit if open fails */
 		write_stream(xx_in, &aa, ll, 0);        /* write to stream, CRLF becomes LF */
-		fclose(xx_in);
+		fclose(xx_in), xx_in = NULL;
 		while (wait(&status) != ff);    /* wait for child */
 		exit(WEXITSTATUS(status));      /* exit with child's status */
 		}
@@ -545,7 +545,7 @@ int do_glob(gbuff)
 	    fwdcx(&glob_ptr);
 	    }
 
-	fclose(xx_out);                         /* through with stream */
+	fclose(xx_out), xx_out = NULL;                         /* through with stream */
 	gbuff->z = glob_ptr.dot;                /* save character count */
 	while (wait(&status) != t);             /* wait for child to finish */
 	setup_tty(TTY_RESUME);
@@ -814,7 +814,7 @@ kill_output(outptr)
     {
     if (outptr->fd)
 	{
-	fclose(outptr->fd);
+	fclose(outptr->fd), outptr->fd = NULL;
 	unlink(outptr->t_name);
 	outptr->fd = NULL;
 	}
@@ -832,8 +832,8 @@ panic()
     set_pointer(0, &aa);                                            /* set a pointer to start of text buffer */
     if (outfile->fd && pbuff->z) write_file(&aa, pbuff->z, 0);      /* and write out buffer unless "open" failed */
 
-    if (po_file.fd) fclose(po_file.fd), po_file.fd = NULL;      /* close any open output files */
-    if (so_file.fd) fclose(so_file.fd), so_file.fd = NULL;
+    if (po_file.fd) fclose(po_file.fd), po_file.fd = NULL, po_file.fd = NULL;      /* close any open output files */
+    if (so_file.fd) fclose(so_file.fd), so_file.fd = NULL, so_file.fd = NULL;
     }
 
 /* do "F" commands */
