@@ -231,7 +231,7 @@ int getqspec(fors, c)   /* fors ("file or search") nonzero = allow _ or * */
     char c;
     {
     if (isdigit(c)) return(c - '0' + 1);
-    else if isalpha(c) return(mapch_l[c] - 'a' + 11);
+    else if (isalpha(c)) return(mapch_l[c] - 'a' + 11);
     else if (fors)
 	{
 	if (c == '_') return (SERBUF);
