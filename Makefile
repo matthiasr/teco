@@ -4,6 +4,9 @@
 CFLAGS = -O
 CC = gcc -ansi -D_POSIX_SOURCE
 TERMCAP = termcap
+DESTDIR ?= /usr/local
+bindir = /bin
+mandir = /man
 
 OBJS = te_data.o te_utils.o te_subs.o te_main.o te_rdcmd.o te_exec0.o \
 		te_exec1.o te_exec2.o te_srch.o te_chario.o te_window.o \
@@ -30,3 +33,9 @@ make clean:
 
 tar:
 	tar -cvf teco.tar `cat MANIFEST`
+
+install: te te.1
+	install -c -m 755 te $(DESTDIR)$(bindir)/te
+	install -c -m 644 te.1 $(DESTDIR)$(mandir)/man1/te.1
+	@echo
+	@echo "You may also want to copy sample.tecorc or the more extensive sample.tecorc2 to ~/.tecorc"
