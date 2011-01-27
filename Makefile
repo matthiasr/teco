@@ -28,7 +28,7 @@ te_subs.o: te_defs.h te_subs.c
 te_utils.o: te_defs.h te_utils.c
 te_window.o: te_defs.h te_window.c
 
-make clean:
+clean:
 	rm -f $(OBJS) te core *~ teco.tar
 
 tar:
