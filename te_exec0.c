@@ -8,7 +8,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-exec_cmdstr()
+exec_qreg(qptr)
+    struct qh *qptr;
     {
     char c;
     int digit_sw;
@@ -17,13 +18,11 @@ exec_cmdstr()
     time_t now;
 
     exitflag = 0;                   /* set flag to "executing" */
-    cmdstr.p = cbuf.f;              /* cmdstr to start of command string */
-    cmdstr.z = cbuf.z;
+    cmdstr.p = qptr->f;             /* cmdstr to start of command string */
+    cmdstr.z = qptr->z;
     cmdstr.flag = cmdstr.dot = cmdstr.c = 0;    /* clear char ptr and iteration flag */
     msp = &cmdstr;                  /* initialize macro stack pointer */
-    esp = &estack[0];               /* initialize expression stack pointer */
     atflag = colonflag = 0;         /* clear flags */
-    esp->flag2 = esp->flag1 = 0;    /* initialize expression reader */
     esp->op = OP_START;
     trace_sw = 0;                   /* start out with trace off */
     digit_sw = 0;                   /* and no digits read */
@@ -227,3 +226,10 @@ exec_cmdstr()
 	}       /* end of "while" command loop */
     return;
     }           /* end of exec_cmdstr */
+
+exec_cmdstr()
+    {
+    esp = &estack[0];               /* initialize expression stack pointer */
+    esp->flag2 = esp->flag1 = 0;    /* initialize expression reader */
+    exec_qreg(&cbuf);
+    }

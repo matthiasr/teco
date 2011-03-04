@@ -119,6 +119,43 @@ reline:                 /* continue reading */
 			window(WIN_REFR);
 			goto restart;
 			}
+		    else if ((c == ESC) && (ed_val & 32))
+		        {
+		        esp = &estack[0];
+
+		        c = gettty();
+		        if (c < ' ') /* control character: type 0 */
+		            {
+		            esp->val2 = 0;
+		            esp->val1 = c;
+		            }
+		        else
+		            {
+		            if (c == '[' || c == 'O') c = gettty();
+		            if (isupper(c))
+		                {
+		                esp->val2 = 1;
+		                esp->val1 = c - 'A' + 1;
+		                }
+		            else if (islower(c))
+		                {
+		                esp->val2 = 2;
+		                esp->val1 = c - 'a' + 1;
+		                }
+		            else if (isdigit(c))
+		                {
+		                esp->val2 = 3;
+		                esp->val1 = c - '0';
+		                while ((c = gettty()) != '~') esp->val1 *= 10, esp->val1 += c - '0';
+		                }
+		            else goto restart;
+		            }
+		        esp->flag2 = esp->flag1 = 1;
+
+		        exec_qreg(&qreg[getqspec(0, 'a')]);
+		        window(WIN_REFR);
+		        goto reline;
+		        }
 
 		    else                    /* first real command on a line */
 			{
