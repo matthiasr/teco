@@ -6,7 +6,7 @@ CC = gcc -ansi -D_POSIX_SOURCE
 TERMCAP = termcap
 DESTDIR ?= /usr/local
 bindir = /bin
-mandir = /man
+mandir = /share/man
 
 OBJS = te_data.o te_utils.o te_subs.o te_main.o te_rdcmd.o te_exec0.o \
 		te_exec1.o te_exec2.o te_srch.o te_chario.o te_window.o \
